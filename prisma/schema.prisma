@@ -1,0 +1,48 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(120)
+  username  String   @unique @db.VarChar(40)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+  annotations Annotation[]
+  dashboard Dashboard?
+}
+
+model Annotation {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(120)
+  content   String   @db.Text
+  icon      String   @db.VarChar(40)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Dashboard {
+  id        String   @id @default(uuid())
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  widgets   DashboardWidget[]
+
+  @@unique([userId])
+}
+
+model DashboardWidget {
+  id          String   @id @default(uuid())
+  widget      String   @db.Text
+  dashboardId String
+  dashboard   Dashboard @relation(fields: [dashboardId], references: [id])
+}
